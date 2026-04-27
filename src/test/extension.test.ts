@@ -1,26 +1,24 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 
+const EXTENSION_ID = "mariostsrs.opencode-sidebar-superterminal";
+
 suite("OpenCode Sidebar Terminal Extension", () => {
   test("VS Code API is available", () => {
     assert.ok(vscode);
   });
 
   test("Extension should be present", () => {
-    const extension = vscode.extensions.getExtension(
-      "mariostsrs.opencode-sidebar-superterminal",
-    );
+    const extension = vscode.extensions.getExtension(EXTENSION_ID);
 
     assert.ok(
       extension,
-      "Expected extension mariostsrs.opencode-sidebar-superterminal to be installed",
+      `Expected extension ${EXTENSION_ID} to be installed`,
     );
   });
 
   test("Extension should activate", async () => {
-    const extension = vscode.extensions.getExtension(
-      "mariostsrs.opencode-sidebar-superterminal",
-    );
+    const extension = vscode.extensions.getExtension(EXTENSION_ID);
 
     assert.ok(extension, "Extension not found");
 
