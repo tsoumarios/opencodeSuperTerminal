@@ -149,7 +149,11 @@ class OpenCodeTerminalProvider
     // Kill any previously spawned PTY before creating a new one, so that
     // re-invocations of resolveWebviewView don't leave orphaned shell processes.
     if (this.ptyProcess) {
-      this.ptyProcess.kill();
+      try {
+        this.ptyProcess.kill();
+      } catch (err) {
+        console.error("Failed to kill existing PTY process:", err);
+      }
       this.ptyProcess = undefined;
     }
 
