@@ -37,8 +37,9 @@ suite("OpenCode Sidebar Terminal Extension", () => {
   });
 
   test("OpenCode terminal view can be focused", async () => {
-    await vscode.commands.executeCommand("opencodeSuperTerminalView.focus");
-
-    assert.ok(true);
+    await assert.doesNotReject(
+      vscode.commands.executeCommand("opencodeSuperTerminalView.focus"),
+      "Expected opencodeSuperTerminalView.focus to execute without rejecting",
+    );
   });
 });
