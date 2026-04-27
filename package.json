@@ -29,7 +29,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package"
+    "package": "vsce package",
+    "test": "vscode-test"
   },
   "dependencies": {
     "@xterm/addon-canvas": "^0.7.0",
@@ -43,6 +44,8 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.39",
     "@types/vscode": "^1.90.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^2.32.0",
     "typescript": "^5.4.5"
   }
