@@ -123,11 +123,17 @@ class OpenCodeTerminalProvider implements vscode.WebviewViewProvider {
     const cwd =
       vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ??
       process.env.USERPROFILE ??
+      process.env.HOME ??
       process.cwd();
 
     try {
-      const shell = process.env.ComSpec || "cmd.exe";
-      this.ptyProcess = pty.spawn(shell, ["/k", "opencode"], {
+      const isWindows = process.platform === "win32";
+      const shell = isWindows
+        ? process.env.ComSpec || "cmd.exe"
+        : process.env.SHELL || "/bin/sh";
+      const shellArgs = isWindows ? ["/k", "opencode"] : ["-c", "opencode"];
+
+      this.ptyProcess = pty.spawn(shell, shellArgs, {
         name: "xterm-256color",
         cols: 80,
         rows: 30,
