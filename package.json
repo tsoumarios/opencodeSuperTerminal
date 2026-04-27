@@ -11,7 +11,7 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onView:opencodeSuperTerminalView"
   ],
   "main": "./out/extension.js",
   "contributes": {
