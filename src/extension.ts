@@ -33,7 +33,7 @@ class OpenCodeTerminalProvider implements vscode.WebviewViewProvider {
     view.webview.options = {
       enableScripts: true,
       localResourceRoots: [
-        vscode.Uri.joinPath(this.extensionUri, "node_modules"),
+        vscode.Uri.joinPath(this.extensionUri, "node_modules", "@xterm"),
       ],
     };
 
