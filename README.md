@@ -19,14 +19,16 @@ Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer side
 | **VS Code** | `>=1.90.0` |
 | **OpenCode CLI** | Must be installed and available on your `PATH`. Install from [opencode.ai](https://opencode.ai/). |
 | **node-pty** | Bundled with VS Code; the extension uses the built-in copy. Falls back to a locally installed version if needed. |
-| **OS** | Windows (uses `%ComSpec%` / `cmd.exe` by default). macOS/Linux support possible with minor shell detection changes. |
+| **OS** | Windows, macOS, and Linux. On Windows the shell is resolved from `%ComSpec%` (falling back to `cmd.exe`); on macOS/Linux from `$SHELL` (falling back to `/bin/sh`). |
 
 ## How It Works
 
 1. On activation the extension registers a **WebviewViewProvider** for the `opencodeSuperTerminalView` view in the Explorer sidebar.
 2. When the view becomes visible, it:
    - Loads xterm.js and its addons (fit, canvas, unicode11) inside the webview.
-   - Spawns a pseudo-terminal via `node-pty` running `cmd /k opencode`.
+   - Spawns a pseudo-terminal via `node-pty` using a platform-detected shell:
+     - **Windows**: `%ComSpec%` (or `cmd.exe`) with args `/k opencode`
+     - **macOS / Linux**: `$SHELL` (or `/bin/sh`) with args `-c opencode`
    - Bridges PTY ↔ webview with message passing (`input`, `output`, `resize`).
 3. On dispose (panel closed / extension deactivated) the PTY process is killed.
 
@@ -36,7 +38,6 @@ This extension does not contribute any configurable settings at this time.
 
 ## Known Issues
 
-- The shell is hard-coded to `cmd.exe` (`%ComSpec%`). On macOS/Linux the spawn command will need adjustment.
 - If `opencode` is not on `PATH`, the terminal will show an error after the shell starts.
 - Canvas renderer may silently fall back to the default DOM renderer on some systems.
 
