@@ -1,6 +1,6 @@
 # OpenCode Sidebar SuperTerminal
 
-Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer sidebar** — no need to switch to the built-in terminal panel. A fully interactive xterm.js terminal is embedded as a webview view, automatically launching `opencode` on activation.
+Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer sidebar** — no need to switch to the built-in terminal panel. A fully interactive xterm.js terminal is embedded as a webview view, automatically launching `opencode` when the view is opened.
 
 ![Screenshot of OpenCode Sidebar SuperTerminal](Screenshot_1.png)
 
