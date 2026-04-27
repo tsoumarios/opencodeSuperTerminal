@@ -191,8 +191,8 @@ class OpenCodeTerminalProvider implements vscode.WebviewViewProvider {
 <html>
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource};">
-  <style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}' ${webview.cspSource};">
+  <style nonce="${nonce}">
     html, body, #terminal {
       width: 100%;
       height: 100%;
