@@ -146,6 +146,13 @@ class OpenCodeTerminalProvider
       cwd = process.cwd();
     }
 
+    // Kill any previously spawned PTY before creating a new one, so that
+    // re-invocations of resolveWebviewView don't leave orphaned shell processes.
+    if (this.ptyProcess) {
+      this.ptyProcess.kill();
+      this.ptyProcess = undefined;
+    }
+
     try {
       const isWindows = process.platform === "win32";
       const shell = isWindows
