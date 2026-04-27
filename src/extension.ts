@@ -1,33 +1,51 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import * as os from "os";
 import type { IPty } from "node-pty";
+
+let outputChannel: vscode.OutputChannel;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  outputChannel = vscode.window.createOutputChannel("OpenCode SuperTerminal");
+  context.subscriptions.push(outputChannel);
+
   try {
+    const provider = new OpenCodeTerminalProvider(context.extensionUri);
     context.subscriptions.push(
+      provider,
       vscode.window.registerWebviewViewProvider(
         "opencodeSuperTerminalView",
-        new OpenCodeTerminalProvider(context.extensionUri),
+        provider,
       ),
     );
 
-    console.log('Extension "opencode-sidebar-superterminal" is now active!');
-    vscode.window.showInformationMessage("OpenCode SuperTerminal activated!");
+    outputChannel.appendLine(
+      'Extension "opencode-sidebar-superterminal" is now active!',
+    );
   } catch (err) {
-    console.error("Failed to activate opencode-sidebar-superterminal:", err);
+    outputChannel.appendLine(
+      `Failed to activate opencode-sidebar-superterminal: ${err}`,
+    );
     vscode.window.showErrorMessage(
       `OpenCode SuperTerminal failed to activate: ${err}`,
     );
   }
 }
 
-class OpenCodeTerminalProvider implements vscode.WebviewViewProvider {
+class OpenCodeTerminalProvider
+  implements vscode.WebviewViewProvider, vscode.Disposable
+{
   private ptyProcess?: IPty;
 
   constructor(private readonly extensionUri: vscode.Uri) {}
+
+  dispose() {
+    this.ptyProcess?.kill();
+    this.ptyProcess = undefined;
+  }
 
   resolveWebviewView(view: vscode.WebviewView) {
     view.webview.options = {
@@ -120,11 +138,13 @@ class OpenCodeTerminalProvider implements vscode.WebviewViewProvider {
       }
     }
 
-    const cwd =
-      vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ??
-      process.env.USERPROFILE ??
-      process.env.HOME ??
-      process.cwd();
+    let cwd: string;
+    try {
+      cwd =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? os.homedir();
+    } catch {
+      cwd = process.cwd();
+    }
 
     try {
       const isWindows = process.platform === "win32";
