@@ -2,7 +2,7 @@
   "name": "opencode-sidebar-superterminal",
   "displayName": "OpenCode Sidebar SuperTerminal",
   "description": "Runs OpenCode inside the VS Code Explorer sidebar.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "mariostsrs",
   "icon": "images/icon.png",
   "engines": {
