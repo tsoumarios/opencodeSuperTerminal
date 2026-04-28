@@ -4,4 +4,4 @@ All notable changes to the "opencode-sidebar-superterminal" extension will be do
 
 ## [Released]
 
-- 1.0.3
+- 1.1.0
