@@ -46,4 +46,4 @@ This extension does not contribute any configurable settings at this time.
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](../LICENSE) for details.
