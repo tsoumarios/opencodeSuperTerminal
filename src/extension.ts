@@ -39,12 +39,23 @@ class OpenCodeTerminalProvider
   implements vscode.WebviewViewProvider, vscode.Disposable
 {
   private ptyProcess?: IPty;
+  private viewDisposables: vscode.Disposable[] = [];
 
   constructor(private readonly extensionUri: vscode.Uri) {}
 
   dispose() {
-    this.ptyProcess?.kill();
+    this._disposeView();
+  }
+
+  private _disposeView() {
+    try {
+      this.ptyProcess?.kill();
+    } catch {
+      // ignore errors when killing
+    }
     this.ptyProcess = undefined;
+    this.viewDisposables.forEach((d) => d.dispose());
+    this.viewDisposables = [];
   }
 
   resolveWebviewView(view: vscode.WebviewView) {
@@ -149,12 +160,7 @@ class OpenCodeTerminalProvider
     // Kill any previously spawned PTY before creating a new one, so that
     // re-invocations of resolveWebviewView don't leave orphaned shell processes.
     if (this.ptyProcess) {
-      try {
-        this.ptyProcess.kill();
-      } catch (err) {
-        console.error("Failed to kill existing PTY process:", err);
-      }
-      this.ptyProcess = undefined;
+      this._disposeView();
     }
 
     try {
@@ -169,11 +175,13 @@ class OpenCodeTerminalProvider
         cols: 80,
         rows: 30,
         cwd,
-        env: {
-          ...process.env,
-          TERM: "xterm-256color",
-          COLORTERM: "truecolor",
-        } as Record<string, string>,
+        env: Object.fromEntries(
+          Object.entries({
+            ...process.env,
+            TERM: "xterm-256color",
+            COLORTERM: "truecolor",
+          }).filter((entry): entry is [string, string] => entry[1] !== undefined),
+        ),
       });
     } catch (err) {
       const msg = `Failed to spawn terminal: ${err}`;
@@ -186,26 +194,38 @@ class OpenCodeTerminalProvider
       return;
     }
 
-    this.ptyProcess.onData((data: string) => {
-      view.webview.postMessage({
-        type: "output",
-        data,
-      });
-    });
+    this.viewDisposables.push(
+      this.ptyProcess.onData((data: string) => {
+        view.webview.postMessage({
+          type: "output",
+          data,
+        });
+      }),
+    );
 
-    view.webview.onDidReceiveMessage((message: any) => {
-      if (message.type === "input") {
-        this.ptyProcess?.write(message.data);
-      }
+    this.viewDisposables.push(
+      view.webview.onDidReceiveMessage((message: any) => {
+        if (message.type === "input") {
+          this.ptyProcess?.write(message.data);
+        }
 
-      if (message.type === "resize") {
-        this.ptyProcess?.resize(message.cols, message.rows);
-      }
-    });
+        if (message.type === "resize") {
+          const cols =
+            typeof message.cols === "number" ? message.cols : undefined;
+          const rows =
+            typeof message.rows === "number" ? message.rows : undefined;
+          if (cols !== undefined && rows !== undefined) {
+            this.ptyProcess?.resize(cols, rows);
+          }
+        }
+      }),
+    );
 
-    view.onDidDispose(() => {
-      this.ptyProcess?.kill();
-    });
+    this.viewDisposables.push(
+      view.onDidDispose(() => {
+        this._disposeView();
+      }),
+    );
   }
 
   private getHtml(
