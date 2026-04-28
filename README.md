@@ -4,6 +4,16 @@ Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer side
 
 ![Screenshot of OpenCode Sidebar SuperTerminal](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/images/screenshot.png)
 
+📦 **Latest Release:** [![Download](https://img.shields.io/badge/Download-VSIX-blue)](https://github.com/tsoumarios/opencodeSuperTerminal/releases/latest)
+
+## Install in VS Code
+
+1. Download `.vsix` located in `extension_package` folder
+2. Open VS Code
+3. Navigate to `Extensions`
+4. In the top right corner `...`
+5. `Install from VSIX...`
+
 ## Features
 
 - **Sidebar-embedded terminal** — A persistent xterm.js terminal lives in the Explorer sidebar, keeping the bottom panel free for other tasks.
@@ -40,14 +50,6 @@ This extension does not contribute any configurable settings at this time.
 
 - If `opencode` is not on `PATH`, the terminal will show an error after the shell starts.
 - Canvas renderer may silently fall back to the default DOM renderer on some systems.
-
-## Release Notes
-
-### 1.0.0
-
-- Initial release.
-- Sidebar xterm.js webview with auto-launched OpenCode.
-- Canvas rendering, Unicode 11, fit addon, and resize support.
 
 ## License
 
