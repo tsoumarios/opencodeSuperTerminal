@@ -1,0 +1,365 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from "vscode";
+import * as os from "os";
+import type { IPty } from "node-pty";
+
+let outputChannel: vscode.OutputChannel;
+
+// This method is called when your extension is activated
+// Your extension is activated the very first time the command is executed
+export function activate(context: vscode.ExtensionContext) {
+  outputChannel = vscode.window.createOutputChannel("OpenCode SuperTerminal");
+  context.subscriptions.push(outputChannel);
+
+  try {
+    const provider = new OpenCodeTerminalProvider(context.extensionUri);
+    context.subscriptions.push(
+      provider,
+      vscode.window.registerWebviewViewProvider(
+        "opencodeSuperTerminalView",
+        provider,
+      ),
+    );
+
+    outputChannel.appendLine(
+      'Extension "opencode-sidebar-superterminal" is now active!',
+    );
+  } catch (err) {
+    outputChannel.appendLine(
+      `Failed to activate opencode-sidebar-superterminal: ${err}`,
+    );
+    vscode.window.showErrorMessage(
+      `OpenCode SuperTerminal failed to activate: ${err}`,
+    );
+  }
+}
+
+class OpenCodeTerminalProvider
+  implements vscode.WebviewViewProvider, vscode.Disposable
+{
+  private ptyProcess?: IPty;
+  private viewDisposables: vscode.Disposable[] = [];
+
+  constructor(private readonly extensionUri: vscode.Uri) {}
+
+  dispose() {
+    this._disposeView();
+  }
+
+  private _disposeView() {
+    try {
+      this.ptyProcess?.kill();
+    } catch {
+      // ignore errors when killing
+    }
+    this.ptyProcess = undefined;
+    this.viewDisposables.forEach((d) => d.dispose());
+    this.viewDisposables = [];
+  }
+
+  resolveWebviewView(view: vscode.WebviewView) {
+    view.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.extensionUri, "node_modules", "@xterm"),
+      ],
+    };
+
+    const xtermCss = view.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@xterm",
+        "xterm",
+        "css",
+        "xterm.css",
+      ),
+    );
+    const xtermJs = view.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@xterm",
+        "xterm",
+        "lib",
+        "xterm.js",
+      ),
+    );
+    const fitAddonJs = view.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@xterm",
+        "addon-fit",
+        "lib",
+        "addon-fit.js",
+      ),
+    );
+    const unicode11Js = view.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@xterm",
+        "addon-unicode11",
+        "lib",
+        "addon-unicode11.js",
+      ),
+    );
+    const canvasAddonJs = view.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this.extensionUri,
+        "node_modules",
+        "@xterm",
+        "addon-canvas",
+        "lib",
+        "addon-canvas.js",
+      ),
+    );
+
+    view.webview.html = this.getHtml(
+      view.webview,
+      xtermCss,
+      xtermJs,
+      fitAddonJs,
+      unicode11Js,
+      canvasAddonJs,
+    );
+
+    // Load node-pty: prefer VS Code's bundled version (compiled for Electron),
+    // fall back to local node_modules
+    let pty: typeof import("node-pty");
+    try {
+      const vscodePath = require.resolve("node-pty", {
+        paths: [require("path").join(vscode.env.appRoot, "node_modules")],
+      });
+      pty = require(vscodePath);
+    } catch {
+      try {
+        pty = require("node-pty");
+      } catch (err) {
+        const msg = `Failed to load node-pty: ${err}`;
+        console.error(msg);
+        vscode.window.showErrorMessage(msg);
+        view.webview.postMessage({
+          type: "output",
+          data: `\r\nError: ${msg}\r\n`,
+        });
+        return;
+      }
+    }
+
+    let cwd: string;
+    try {
+      cwd =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? os.homedir();
+    } catch {
+      cwd = process.cwd();
+    }
+
+    // Kill any previously spawned PTY before creating a new one, so that
+    // re-invocations of resolveWebviewView don't leave orphaned shell processes.
+    if (this.ptyProcess) {
+      this._disposeView();
+    }
+
+    try {
+      const isWindows = process.platform === "win32";
+      const shell = isWindows
+        ? process.env.ComSpec || "cmd.exe"
+        : process.env.SHELL || "/bin/sh";
+      const shellArgs = isWindows ? ["/k", "opencode"] : ["-c", "opencode"];
+
+      this.ptyProcess = pty.spawn(shell, shellArgs, {
+        name: "xterm-256color",
+        cols: 80,
+        rows: 30,
+        cwd,
+        env: Object.fromEntries(
+          Object.entries({
+            ...process.env,
+            TERM: "xterm-256color",
+            COLORTERM: "truecolor",
+          }).filter((entry): entry is [string, string] => entry[1] !== undefined),
+        ),
+      });
+    } catch (err) {
+      const msg = `Failed to spawn terminal: ${err}`;
+      console.error(msg);
+      vscode.window.showErrorMessage(msg);
+      view.webview.postMessage({
+        type: "output",
+        data: `\r\nError: ${msg}\r\n`,
+      });
+      return;
+    }
+
+    this.viewDisposables.push(
+      this.ptyProcess.onData((data: string) => {
+        view.webview.postMessage({
+          type: "output",
+          data,
+        });
+      }),
+    );
+
+    this.viewDisposables.push(
+      view.webview.onDidReceiveMessage((message: any) => {
+        if (message.type === "input") {
+          this.ptyProcess?.write(message.data);
+        }
+
+        if (message.type === "resize") {
+          const cols =
+            typeof message.cols === "number" ? message.cols : undefined;
+          const rows =
+            typeof message.rows === "number" ? message.rows : undefined;
+          if (cols !== undefined && rows !== undefined) {
+            this.ptyProcess?.resize(cols, rows);
+          }
+        }
+      }),
+    );
+
+    this.viewDisposables.push(
+      view.onDidDispose(() => {
+        this._disposeView();
+      }),
+    );
+  }
+
+  private getHtml(
+    webview: vscode.Webview,
+    xtermCss: vscode.Uri,
+    xtermJs: vscode.Uri,
+    fitAddonJs: vscode.Uri,
+    unicode11Js: vscode.Uri,
+    canvasAddonJs: vscode.Uri,
+  ): string {
+    const nonce = getNonce();
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
+  <style nonce="${nonce}">
+    html, body, #terminal {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #1e1e1e;
+    }
+    #error { color: red; padding: 10px; font-family: monospace; display: none; }
+    .xterm { height: 100%; }
+  </style>
+
+  <link rel="stylesheet" href="${xtermCss}" />
+</head>
+<body>
+  <div id="error"></div>
+  <div id="terminal"></div>
+
+  <script nonce="${nonce}" src="${xtermJs}"></script>
+  <script nonce="${nonce}" src="${fitAddonJs}"></script>
+  <script nonce="${nonce}" src="${unicode11Js}"></script>
+  <script nonce="${nonce}" src="${canvasAddonJs}"></script>
+
+  <script nonce="${nonce}">
+    const errEl = document.getElementById('error');
+    function showError(msg) {
+      errEl.style.display = 'block';
+      errEl.textContent += msg + '\\n';
+    }
+
+    try {
+      if (typeof Terminal === 'undefined') {
+        showError('ERROR: xterm.js failed to load');
+        throw new Error('xterm not loaded');
+      }
+      if (typeof FitAddon === 'undefined') {
+        showError('ERROR: FitAddon failed to load');
+        throw new Error('FitAddon not loaded');
+      }
+
+    const vscode = acquireVsCodeApi();
+
+    const terminal = new Terminal({
+      cursorBlink: true,
+      fontSize: 13,
+      allowProposedApi: true,
+      scrollback: 1000,
+      theme: {
+        background: '#1e1e1e',
+        foreground: '#d4d4d4',
+        cursor: '#d4d4d4'
+      }
+    });
+
+    const fitAddon = new FitAddon.FitAddon();
+    terminal.loadAddon(fitAddon);
+
+    const unicode11Addon = new Unicode11Addon.Unicode11Addon();
+    terminal.loadAddon(unicode11Addon);
+    terminal.unicode.activeVersion = '11';
+
+    try {
+      const canvasAddon = new CanvasAddon.CanvasAddon();
+      terminal.loadAddon(canvasAddon);
+    } catch(e) {
+      console.warn('Canvas addon failed, using default renderer:', e);
+    }
+
+    terminal.open(document.getElementById('terminal'));
+    fitAddon.fit();
+    terminal.focus();
+
+    terminal.onData(data => {
+      vscode.postMessage({ type: 'input', data });
+    });
+
+    window.addEventListener('message', event => {
+      const message = event.data;
+
+      if (message.type === 'output') {
+        terminal.write(message.data);
+      }
+    });
+
+    function resize() {
+      fitAddon.fit();
+
+      vscode.postMessage({
+        type: 'resize',
+        cols: terminal.cols,
+        rows: terminal.rows
+      });
+    }
+
+    window.addEventListener('resize', resize);
+    setTimeout(resize, 300);
+
+    } catch(e) {
+      showError('Terminal init error: ' + e.message);
+    }
+  </script>
+</body>
+</html>
+`;
+  }
+}
+
+function getNonce() {
+  let text = "";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+// This method is called when your extension is deactivated
+export function deactivate() {}

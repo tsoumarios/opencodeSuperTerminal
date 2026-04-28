@@ -1,0 +1,64 @@
+{
+  "name": "opencode-sidebar-superterminal",
+  "displayName": "OpenCode Sidebar SuperTerminal",
+  "description": "Runs OpenCode inside the VS Code Explorer sidebar.",
+  "version": "1.0.0",
+  "publisher": "mariostsrs",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "terminal",
+    "sidebar",
+    "opencode",
+    "ai",
+    "shell"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "opencodeSuperTerminalView",
+          "name": "OpenCode SuperTerminal",
+          "type": "webview",
+          "icon": "$(terminal)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "test": "npm run compile && node ./out/test/runTest.js"
+  },
+  "dependencies": {
+    "@xterm/addon-canvas": "^0.7.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-unicode11": "^0.9.0",
+    "@xterm/xterm": "^5.5.0",
+    "node-pty": "^1.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.19.39",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^2.32.0",
+    "glob": "^13.0.6",
+    "mocha": "^11.7.5",
+    "typescript": "^5.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsoumarios/opencodeSuperTerminal.git"
+  }
+}
