@@ -4,11 +4,20 @@
   "description": "Runs OpenCode inside the VS Code Explorer sidebar.",
   "version": "1.0.0",
   "publisher": "mariostsrs",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "terminal",
+    "sidebar",
+    "opencode",
+    "ai",
+    "shell"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -37,6 +46,7 @@
     "node-pty": "^1.0.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.39",
     "@types/vscode": "^1.90.0",
@@ -46,5 +56,9 @@
     "glob": "^13.0.6",
     "mocha": "^11.7.5",
     "typescript": "^5.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsoumarios/opencodeSuperTerminal.git"
   }
 }

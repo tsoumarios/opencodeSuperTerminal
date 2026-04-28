@@ -2,7 +2,7 @@
 
 Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer sidebar** — no need to switch to the built-in terminal panel. A fully interactive xterm.js terminal is embedded as a webview view, automatically launching `opencode` when the view is opened.
 
-![Screenshot of OpenCode Sidebar SuperTerminal](Screenshot_1.png)
+![Screenshot of OpenCode Sidebar SuperTerminal](images/Screenshot_1.png)
 
 ## Features
 
@@ -14,12 +14,12 @@ Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer side
 
 ## Requirements
 
-| Requirement | Details |
-|---|---|
-| **VS Code** | `>=1.90.0` |
-| **OpenCode CLI** | Must be installed and available on your `PATH`. Install from [opencode.ai](https://opencode.ai/). |
-| **node-pty** | Bundled with VS Code; the extension uses the built-in copy. Falls back to a locally installed version if needed. |
-| **OS** | Windows, macOS, and Linux. On Windows the shell is resolved from `%ComSpec%` (falling back to `cmd.exe`); on macOS/Linux from `$SHELL` (falling back to `/bin/sh`). |
+| Requirement      | Details                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **VS Code**      | `>=1.90.0`                                                                                                                                                          |
+| **OpenCode CLI** | Must be installed and available on your `PATH`. Install from [opencode.ai](https://opencode.ai/).                                                                   |
+| **node-pty**     | Bundled with VS Code; the extension uses the built-in copy. Falls back to a locally installed version if needed.                                                    |
+| **OS**           | Windows, macOS, and Linux. On Windows the shell is resolved from `%ComSpec%` (falling back to `cmd.exe`); on macOS/Linux from `$SHELL` (falling back to `/bin/sh`). |
 
 ## How It Works
 
@@ -27,8 +27,8 @@ Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer side
 2. When the view becomes visible, it:
    - Loads xterm.js and its addons (fit, canvas, unicode11) inside the webview.
    - Spawns a pseudo-terminal via `node-pty` using a platform-detected shell:
-     - **Windows**: `%ComSpec%` (or `cmd.exe`) with args `/k opencode`
-     - **macOS / Linux**: `$SHELL` (or `/bin/sh`) with args `-c opencode`
+      - **Windows**: `%ComSpec%` (or `cmd.exe`) with args `/k opencode`
+      - **macOS / Linux**: `$SHELL` (or `/bin/sh`) with args `-c opencode`
    - Bridges PTY ↔ webview with message passing (`input`, `output`, `resize`).
 3. On dispose (panel closed / extension deactivated) the PTY process is killed.
 
