@@ -37,7 +37,7 @@ Compatible with **all IntelliJ-based IDEs**: Rider, IntelliJ IDEA, WebStorm, PyC
 
 ### Option A — Install from a Release (recommended for users)
 
-1. Go to the [Releases page](https://github.com/tsoumarios/opencodeSuperTerminal/releases) and download the latest `opencode-superterminal-*.zip`.
+1. Go to the [Releases page](https://github.com/tsoumarios/opencodeSuperTerminal/releases) and download the latest `opencodeSuperTerminal-Intellij/plugin-package/opencode-superterminal-*.zip`.
 2. Open your JetBrains IDE (Rider, IDEA, WebStorm, PyCharm, …).
 3. Open **Settings** (`Ctrl+Alt+S` / `Cmd+,` on macOS) → **Plugins**.
 4. Click the **⚙ gear icon** at the top of the Plugins panel.
