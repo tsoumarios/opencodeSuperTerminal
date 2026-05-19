@@ -1,0 +1,41 @@
+<idea-plugin>
+    <id>com.mariostsrs.opencode-superterminal</id>
+    <name>OpenCode SuperTerminal</name>
+    <version>1.0.0</version>
+    <vendor email="" url="https://github.com/tsoumarios/opencodeSuperTerminal">mariostsrs</vendor>
+
+    <description><![CDATA[
+        Run <a href="https://opencode.ai/">OpenCode</a> directly inside a dedicated JetBrains IDE tool window.<br/>
+        A fully interactive terminal is embedded in the right sidebar, automatically launching <code>opencode</code> when opened.
+        <br/><br/>
+        <b>Features:</b>
+        <ul>
+            <li>Sidebar-embedded terminal in a dedicated right-side tool window</li>
+            <li>Auto-launches OpenCode on open — no manual commands needed</li>
+            <li>Full terminal emulation (256-color, Unicode, cursor blink, scrollback)</li>
+            <li>Auto-resize when the panel is resized</li>
+            <li>Workspace-aware: opens in the current project directory</li>
+        </ul>
+        <br/>
+        <b>Requirements:</b> The <code>opencode</code> CLI must be installed and available on your <code>PATH</code>.
+        Install from <a href="https://opencode.ai/">opencode.ai</a>.
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <b>1.0.0</b>
+        <ul>
+            <li>Initial release: OpenCode SuperTerminal tool window for all IntelliJ-based IDEs</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="OpenCode"
+                    anchor="right"
+                    secondary="false"
+                    icon="/icons/opencode.svg"
+                    factoryClass="com.mariostsrs.opencode.OpenCodeToolWindowFactory"/>
+    </extensions>
+</idea-plugin>
