@@ -72,19 +72,28 @@ class OpenCodeTerminalRunner(
             System.getenv("SHELL") ?: "/bin/sh"
         }
 
-        // Same launch strategy as the VS Code extension:
-        //   Unix  →  $SHELL -c opencode
-        //   Win   →  %ComSpec% /k opencode
+        // Build a PATH that includes common user-local bin directories that
+        // JetBrains IDEs miss when launched from a desktop shortcut (they don't
+        // source the user's shell rc/profile).
+        val enrichedPath = buildEnrichedPath()
+
+        // Unix:    $SHELL -c 'opencode; exec $SHELL'
+        //   • Sources the shell login profile via -l so PATH is fully populated.
+        //   • 'exec $SHELL' keeps the terminal open if opencode exits/fails,
+        //     giving the user a usable shell instead of a closed panel.
+        // Windows: %ComSpec% /k opencode
+        //   • /k keeps the window open after the command finishes.
         val command = if (isWindows) {
             arrayOf(shell, "/k", "opencode")
         } else {
-            arrayOf(shell, "-c", "opencode")
+            arrayOf(shell, "-c", "opencode; exec \$SHELL")
         }
 
         val env = buildMap<String, String> {
             putAll(System.getenv())
             put("TERM", "xterm-256color")
             put("COLORTERM", "truecolor")
+            put("PATH", enrichedPath)
         }
 
         LOG.info("OpenCode: spawning ${command.toList()} in $cwd")
@@ -109,6 +118,34 @@ class OpenCodeTerminalRunner(
         }
 
         return OpenCodeTtyConnector(process)
+    }
+
+    /**
+     * Builds an enriched PATH by prepending directories that are commonly set
+     * by shell rc/profile files but are absent when a JetBrains IDE is launched
+     * from a desktop shortcut (GUI apps on Linux/macOS don't source the user's
+     * shell initialisation files).
+     *
+     * Includes, in priority order:
+     *   - Directories already in the process PATH
+     *   - ~/.opencode/bin   (opencode default install location)
+     *   - ~/.local/bin      (pip/pipx/cargo/go user installs)
+     *   - ~/bin             (traditional user scripts directory)
+     *   - /usr/local/bin    (Homebrew on Linux, manually installed tools)
+     */
+    private fun buildEnrichedPath(): String {
+        val home = System.getProperty("user.home") ?: ""
+        val existing = System.getenv("PATH") ?: ""
+        val extra = listOf(
+            "$home/.opencode/bin",
+            "$home/.local/bin",
+            "$home/bin",
+            "/usr/local/bin"
+        )
+        val parts = (extra + existing.split(":"))
+            .filter { it.isNotBlank() }
+            .distinct()
+        return parts.joinToString(":")
     }
 }
 
