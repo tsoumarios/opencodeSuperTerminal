@@ -4,7 +4,7 @@ Run [OpenCode](https://opencode.ai/) directly inside a dedicated **right-side to
 
 Compatible with **all IntelliJ-based IDEs**: Rider, IntelliJ IDEA, WebStorm, PyCharm, GoLand, and more.
 
-![Screenshot of OpenCode SuperTerminal for IntelliJ](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/opencodeSuperTerminal-Intellij/src/main/resources/screenshots/screenshot.png)
+![Screenshot of OpenCode SuperTerminal for IntelliJ](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/opencodeSuperTerminal-Intellij/src/main/resources/Screenshots/Screenshot.png)
 
 ## Features
 
