@@ -52,7 +52,10 @@ class OpenCodeTerminalRunner(
 
     private fun createTerminalWidget(disposable: Disposable): JediTermWidget {
         val settings = OpenCodeSettingsProvider()
-        return JediTermWidget(settings, disposable)
+        val widget = JediTermWidget(settings)
+        // Shut the widget down when the tool window is disposed
+        Disposer.register(disposable) { widget.close() }
+        return widget
     }
 
     // -------------------------------------------------------------------------
@@ -131,10 +134,6 @@ private class OpenCodeTtyConnector(
             ptyProcess.winSize = WinSize(terminalSize.width, terminalSize.height)
         }
     }
-
-    override fun resizeImmediately() {
-        // resize(Dimension) is the preferred path; this no-op satisfies the interface.
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -143,9 +142,8 @@ private class OpenCodeTtyConnector(
 
 /**
  * Terminal appearance settings. Keeps defaults from [DefaultSettingsProvider]
- * but disables the logout-close behaviour and audible bell.
+ * but disables the audible bell.
  */
 private class OpenCodeSettingsProvider : DefaultSettingsProvider() {
-    override fun shouldCloseTabOnLogout(): Boolean = false
     override fun audibleBell(): Boolean = false
 }
