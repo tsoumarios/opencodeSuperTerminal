@@ -82,4 +82,4 @@ Then follow steps 2–7 from Option A to install the produced `.zip`.
 
 ## License
 
-See [LICENSE](../opencodeSuperTerminal-VsCode/LICENSE) for details.
+This project is licensed under the [MIT License](LICENSE).
