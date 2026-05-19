@@ -1,0 +1,12 @@
+# VS Code / Node
+node_modules/
+out/
+dist/
+*.vsix
+!extension_package/*.vsix
+
+# IntelliJ / Gradle
+.gradle/
+build/
+.idea/
+*.iml
