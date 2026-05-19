@@ -4,6 +4,8 @@ Run [OpenCode](https://opencode.ai/) directly inside a dedicated **right-side to
 
 Compatible with **all IntelliJ-based IDEs**: Rider, IntelliJ IDEA, WebStorm, PyCharm, GoLand, and more.
 
+![Screenshot of OpenCode SuperTerminal for IntelliJ](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/opencodeSuperTerminal-Intellij/src/main/resources/icons/Screenshot.png)
+
 ## Features
 
 - **Right-sidebar tool window** — A persistent terminal lives in a dedicated panel, keeping the bottom area free for other tasks.
