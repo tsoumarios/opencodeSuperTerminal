@@ -29,7 +29,7 @@ Compatible with **all IntelliJ-based IDEs**: Rider, IntelliJ IDEA, WebStorm, PyC
 3. The runner:
    - Resolves the project's base directory as the working directory.
    - Detects the platform shell (`$SHELL` / `%ComSpec%`).
-   - Spawns a PTY process via **pty4j** (bundled with IntelliJ) running `<shell> -c opencode` (Unix) or `<shell> /k opencode` (Windows).
+   - Spawns a PTY process via **pty4j** (bundled with IntelliJ). On Unix it runs `<shell> -i -l -c "opencode; exec $SHELL"`, so your shell's login/interactive startup files are loaded and `opencode` is resolved using the same `PATH` you typically get in a normal terminal session. After `opencode` exits, `exec $SHELL` replaces that command shell with a fresh interactive shell, which is why the terminal stays open. On Windows it runs `<shell> /k opencode`, which likewise keeps the terminal open after the command finishes.
    - Bridges the PTY ↔ JediTerm widget for full interactive terminal I/O.
 4. On tool window close or IDE exit, the PTY process is killed automatically.
 
@@ -82,4 +82,4 @@ Then follow steps 2–7 from Option A to install the produced `.zip`.
 
 ## License
 
-See [LICENSE](../opencodeSuperTerminal-VsCode/LICENSE) for details.
+This project is licensed under the [MIT License](LICENSE).
