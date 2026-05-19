@@ -31,9 +31,36 @@ Compatible with **all IntelliJ-based IDEs**: Rider, IntelliJ IDEA, WebStorm, PyC
    - Bridges the PTY ↔ JediTerm widget for full interactive terminal I/O.
 4. On tool window close or IDE exit, the PTY process is killed automatically.
 
-## Building
+## Installing
+
+### Option A — Install from a Release (recommended for users)
+
+1. Go to the [Releases page](https://github.com/tsoumarios/opencodeSuperTerminal/releases) and download the latest `opencode-superterminal-*.zip`.
+2. Open your JetBrains IDE (Rider, IDEA, WebStorm, PyCharm, …).
+3. Open **Settings** (`Ctrl+Alt+S` / `Cmd+,` on macOS) → **Plugins**.
+4. Click the **⚙ gear icon** at the top of the Plugins panel.
+5. Choose **Install Plugin from Disk…**
+6. Select the downloaded `.zip` file and click **OK**.
+7. Click **Restart IDE** when prompted.
+
+After restart, the **OpenCode** tool window appears in the right sidebar strip. Click it to open the panel — `opencode` launches automatically in your project directory.
+
+> **Tip:** If the tool window is not visible, go to **View → Tool Windows → OpenCode**.
+
+### Option B — Build from source
 
 Requires JDK 17+.
+
+```bash
+git clone https://github.com/tsoumarios/opencodeSuperTerminal.git
+cd opencodeSuperTerminal/opencodeSuperTerminal-Intellij
+./gradlew buildPlugin
+# Output: build/distributions/opencode-superterminal-<version>.zip
+```
+
+Then follow steps 2–7 from Option A to install the produced `.zip`.
+
+## Building & Development
 
 ```bash
 # Build the plugin zip (output: build/distributions/)
@@ -46,16 +73,9 @@ Requires JDK 17+.
 ./gradlew verifyPlugin
 ```
 
-## Installing
-
-1. Run `./gradlew buildPlugin` — produces a `.zip` in `build/distributions/`.
-2. Open your JetBrains IDE.
-3. Go to **Settings → Plugins → ⚙ → Install Plugin from Disk…**
-4. Select the `.zip` file and restart the IDE.
-
 ## Known Issues
 
-- If `opencode` is not on `PATH`, the terminal will show a shell error after launch.
+- If `opencode` is not on `PATH`, the terminal will stay open and show the shell error. You can then run `opencode` manually from the prompt.
 - The tool window icon may appear monochrome in older IDE themes.
 
 ## License
