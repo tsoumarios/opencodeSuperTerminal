@@ -19,10 +19,11 @@ import javax.swing.JComponent
 
 /**
  * Creates and manages a JediTerm terminal widget connected to a pty4j PTY process
- * that runs the `opencode` CLI. Mirrors the VS Code extension behaviour:
+ * that runs the `opencode` CLI:
  *   - workspace-aware CWD (project base path)
- *   - platform-detected shell (SHELL on Unix, ComSpec on Windows)
- *   - spawns: `<shell> -c opencode`  /  `<shell> /k opencode`
+ *   - platform-detected shell ($SHELL on Unix, %ComSpec% on Windows)
+ *   - spawns as an interactive login shell so ~/.bashrc / ~/.zshrc / ~/.profile
+ *     are sourced and the user's full PATH is available
  *   - kills the PTY process when the parent Disposable is disposed
  */
 class OpenCodeTerminalRunner(
@@ -72,16 +73,27 @@ class OpenCodeTerminalRunner(
         val shell = if (isWindows) {
             System.getenv("ComSpec") ?: "cmd.exe"
         } else {
-            System.getenv("SHELL") ?: "/bin/sh"
+            System.getenv("SHELL") ?: "/bin/bash"
         }
 
-        // Same launch strategy as the VS Code extension:
-        //   Unix  →  $SHELL -c opencode
-        //   Win   →  %ComSpec% /k opencode
+        // Unix: spawn as an interactive login shell (-i -l) so the shell sources
+        //   ~/.profile, ~/.bash_profile, ~/.zprofile, ~/.bashrc, ~/.zshrc etc.
+        //   This is the only reliable way to get the user's full PATH when the IDE
+        //   is launched from a desktop shortcut (GUI apps do not inherit the PATH
+        //   set by shell rc/profile files).
+        //
+        //   Command: $SHELL -i -l -c 'opencode; exec $SHELL'
+        //     -i  = interactive  → sources ~/.bashrc / ~/.zshrc
+        //     -l  = login        → sources ~/.profile / ~/.bash_profile / ~/.zprofile
+        //     'opencode; exec $SHELL' → runs opencode, then hands control to an
+        //                               interactive shell so the panel stays open
+        //                               if opencode exits or fails.
+        //
+        // Windows: %ComSpec% /k opencode  (/k keeps the window open after the command)
         val command = if (isWindows) {
             arrayOf(shell, "/k", "opencode")
         } else {
-            arrayOf(shell, "-c", "opencode")
+            arrayOf(shell, "-i", "-l", "-c", "opencode; exec \$SHELL")
         }
 
         val env = buildMap<String, String> {
