@@ -55,7 +55,7 @@ Requires JDK 17+.
 git clone https://github.com/tsoumarios/opencodeSuperTerminal.git
 cd opencodeSuperTerminal/opencodeSuperTerminal-Intellij
 ./gradlew buildPlugin
-# Output: build/distributions/opencode-superterminal-<version>.zip
+# Output: build/distributions/opencode-superterminal-1.2.0.zip
 ```
 
 Then follow steps 2–7 from Option A to install the produced `.zip`.
