@@ -2,7 +2,7 @@
 
 Run [OpenCode](https://opencode.ai/) directly inside the VS Code **Explorer sidebar** — no need to switch to the built-in terminal panel. A fully interactive xterm.js terminal is embedded as a webview view, automatically launching `opencode` when the view is opened.
 
-![Screenshot of OpenCode Sidebar SuperTerminal](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/images/screenshot.png)
+![Screenshot of OpenCode Sidebar SuperTerminal](https://raw.githubusercontent.com/tsoumarios/opencodeSuperTerminal/master/opencodeSuperTerminal-VsCode/images/screenshot.png)
 
 📦 **Latest Release:** [![Download](https://img.shields.io/badge/Download-VSIX-blue)](https://github.com/tsoumarios/opencodeSuperTerminal/releases/latest)
 
