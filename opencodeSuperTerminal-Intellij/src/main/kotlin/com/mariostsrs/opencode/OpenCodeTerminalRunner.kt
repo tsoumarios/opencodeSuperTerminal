@@ -5,7 +5,10 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.jediterm.terminal.ProcessTtyConnector
+import com.jediterm.terminal.TerminalColor
+import com.jediterm.terminal.TextStyle
 import com.jediterm.terminal.TtyConnector
+import com.jediterm.terminal.emulator.ColorPaletteImpl
 import com.jediterm.terminal.ui.JediTermWidget
 import com.jediterm.terminal.ui.settings.DefaultSettingsProvider
 import com.pty4j.PtyProcessBuilder
@@ -141,9 +144,22 @@ private class OpenCodeTtyConnector(
 // -----------------------------------------------------------------------------
 
 /**
- * Terminal appearance settings. Keeps defaults from [DefaultSettingsProvider]
- * but disables the audible bell.
+ * Terminal appearance settings. Enforces a dark theme (dark background,
+ * light foreground) so the terminal always looks correct regardless of the
+ * IDE's own Light/Dark theme selection, and uses the standard xterm-256
+ * colour palette for accurate colour output.
  */
 private class OpenCodeSettingsProvider : DefaultSettingsProvider() {
+
+    // Dark background (#1E1E1E) + light foreground (#D4D4D4) — matches the
+    // VS Code extension theme and opencode's own colour scheme.
+    override fun getDefaultStyle(): TextStyle = TextStyle(
+        TerminalColor.rgb(212, 212, 212),  // foreground: #D4D4D4
+        TerminalColor.rgb(30, 30, 30)      // background: #1E1E1E
+    )
+
+    // Use the standard xterm 256-colour palette for accurate ANSI colours.
+    override fun getTerminalColorPalette() = ColorPaletteImpl.XTERM_PALETTE
+
     override fun audibleBell(): Boolean = false
 }
